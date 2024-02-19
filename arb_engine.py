@@ -1,21 +1,11 @@
 # should probably make classes
 import aevo_options_api as aevo
 import deribit_options_api as deribit
-# import numpy as np
 import asyncio
 import math
 import time
 import copy
 from datetime import datetime as dt
-import pandas as pd
-import streamlit as st
-import tkinter as tk
-from tkinter import ttk
-import tkinter.scrolledtext as scrolledtext 
-
-# temporary, set up class variables per module later
-DERIBIT_URL = "https://www.deribit.com/options/ETH/ETH-"
-AEVO_URL = "https://app.aevo.xyz/option/eth"
 
 
 
@@ -318,130 +308,3 @@ def sort_arb_dict_orderbooks(arb_dict_orderbooks):
 
     arb_dict_sorted["index"] = index
     return arb_dict_sorted
-
-
-def draw_gui(arb_dict):
-    root = tk.Tk()
-    root.title("orderbook")
-    # root.geometry("800x500")
-    
-    frm = ttk.Frame(root, padding=10)
-    frm.grid()
-
-    text = ""
-
-    for expiry in arb_dict:
-        for strike in arb_dict[expiry]:
-            text += f"{expiry}: {strike}:     [{round(arb_dict[expiry][strike][0][0], 3)}, {arb_dict[expiry][strike][0][1]}],     [{round(arb_dict[expiry][strike][1][0], 3)}, {arb_dict[expiry][strike][1][1]}],     {round(arb_dict[expiry][strike][2], 3)},     {round(arb_dict[expiry][strike][3], 3)}% \n"
-
-    text_area = scrolledtext.ScrolledText(root, width=110, height = 50)
-    text_area.grid()
-    text_area.insert(tk.INSERT, text)
- 
-    # ttk.Button(frm, text="Quit", command=root.destroy).grid(column=1, row=0)
-    root.mainloop()
-
-
-
-
-def draw_streamlit_gui(arb_dict_sorted):
-    expiries = list(arb_dict_sorted.keys())
-    # arb_df_list = []
-
-    for expiry in expiries:
-        for strike in arb_dict_sorted[expiry]:
-            arb_dict_sorted[expiry][strike][0] = str(arb_dict_sorted[expiry][strike][0])
-            arb_dict_sorted[expiry][strike][1] = str(arb_dict_sorted[expiry][strike][1])
-
-        arb_df = pd.DataFrame.from_dict(data=arb_dict_sorted[expiry], orient="index", columns=["Put mark", "Call mark", "Profit", "%Profit"])
-        # arb_df_list.append(arb_df)
-
-        st.subheader(expiry)
-        st.dataframe(arb_df)
-
-
-
-
-def draw_streamlit_gui_orderbooks(arb_dict_orderbooks_sorted):
-    expiries = list(arb_dict_orderbooks_sorted.keys())
-    # arb_df_list = []
-    index = arb_dict_orderbooks_sorted["index"]
-    st.subheader("Ethereum index price: " + str(index))
-
-    for expiry in expiries:
-        if expiry == "index":
-            break
-
-        for strike in arb_dict_orderbooks_sorted[expiry]:
-            arb_dict_orderbooks_sorted[expiry][strike][0] = str(arb_dict_orderbooks_sorted[expiry][strike][0])
-            arb_dict_orderbooks_sorted[expiry][strike][1] = str(arb_dict_orderbooks_sorted[expiry][strike][1])
-            arb_dict_orderbooks_sorted[expiry][strike][2] = str(arb_dict_orderbooks_sorted[expiry][strike][2])
-            arb_dict_orderbooks_sorted[expiry][strike][3] = str(arb_dict_orderbooks_sorted[expiry][strike][3])
-
-        arb_df = pd.DataFrame.from_dict(data=arb_dict_orderbooks_sorted[expiry], orient="index", columns=["Put bid", "Put ask", "Call bid", "Call ask", "Profit", "%Profit", "APY"])
-        # arb_df_list.append(arb_df)
-
-        st.subheader(expiry)
-        st.dataframe(arb_df)
-
-
-
-
-def main():
-    deribit_markets = deribit.get_markets()
-    # print(deribit_markets[140:170])
-    deribit_markets_simple = deribit.get_markets_simple(deribit_markets)
-    
-    # print(deribit_orderbooks_simple)
-    aevo_markets = aevo.get_markets()
-    aevo_markets_simple = aevo.get_markets_simple(aevo_markets)
-
-    aggregated_markets = aggregate_markets(deribit_markets_simple, aevo_markets_simple)
-    arb_dict_mark = arb_dict_from_mark(aggregated_markets)
-
-    arb_dict_mark_sorted = sort_arb_dict_mark(arb_dict_mark)
-    # print(arb_dict_mark_sorted)
-
-
-
-    deribit_orderbooks_simple = deribit.get_orderbooks_simple(deribit_markets)
-
-    start = time.perf_counter()
-    loop = asyncio.new_event_loop()
-    aevo_orderbooks = loop.run_until_complete(aevo.get_orderbooks(aevo_markets, loop))
-    loop.close()
-    # print("event loop is closed: " + str(loop.is_closed()))
-    end = time.perf_counter()
-    aevo_orderbooks_simple = aevo.get_orderbooks_simple(aevo_orderbooks)
-    # print(aevo_orderbooks_simple)
-    # print(end-start)
-    
-    aggregated_orderbooks = aggregate_orderbooks(deribit_orderbooks_simple, aevo_orderbooks_simple)
-    print(aggregated_orderbooks)
-    arb_dict_orderbooks = arb_dict_from_orderbooks(aggregated_orderbooks)
-    print(arb_dict_orderbooks)
-
-    arb_dict_orderbooks_sorted = sort_arb_dict_orderbooks(arb_dict_orderbooks)
-    # print(arb_dict_orderbooks_sorted)
-    # print(simplify_aggregated_orderbooks(aggregated_orderbooks))
-
-
-    draw_streamlit_gui_orderbooks(arb_dict_orderbooks_sorted)
-   
-
-
-    # print(aevo_markets[0:5])
-
-    # print(deribit_markets[0:5])
-
-    # print(arb_dict_sorted)
-
-    # draw_gui(arb_dict_sorted)
-
-    # draw_streamlit_gui(arb_dict_sorted)
-
-
-
-
-if __name__ == "__main__":
-    main()
