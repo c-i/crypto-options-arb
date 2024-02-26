@@ -10,7 +10,7 @@ from datetime import datetime as dt
 
 
 
-def aggregate_markets(*markets_simple_args):
+def aggregate_markets(markets_simple_args):
     # markets_simple format: [[put mark, call mark, strike, expiry (DD:MM:YY), index]...[]]
     # aggregated_markets format: {expiry1: {strike1: [[[put, label]...[]], [[call, label]...[]]]}, ... , strike_n: []}, ... , expiry_n: {...}}
 
@@ -148,7 +148,7 @@ def sort_arb_dict_mark(arb_dict_mark):
 
 
 
-def aggregate_orderbooks(*orderbooks_simple_args):
+def aggregate_orderbooks(orderbooks_simple_args):
     # orderbooks_simple_args: ([exchange, [put_bid, put_ask, call_bid, call_ask, strike, expiry, index], ... ,[]], ... , [exchange_n, [], ... []])
     # aggregated_orderbooks format: {expiry1: {strike1: [[[put_bid, label]...[]], [[put_ask, label]...[]], [[call_bid, label], [[call_ask, label], ...[]]]}, ... , strike_n: [[], [], [], []]}, ... , expiry_n: {...}}
     orderbooks = list(orderbooks_simple_args)
@@ -308,3 +308,21 @@ def sort_arb_dict_orderbooks(arb_dict_orderbooks):
 
     arb_dict_sorted["index"] = index
     return arb_dict_sorted
+
+
+
+
+class Markets:
+    def __init__(self, *markets_simple):
+        self.aggregated_markets = aggregate_markets(markets_simple)
+        self.arb_dict = arb_dict_from_mark(self.aggregated_markets)
+        self.arb_dict_sorted = sort_arb_dict_mark(self.arb_dict)
+
+
+
+
+class Orderbooks:
+    def __init__(self, *orderbooks_simple):
+        self.aggregated_orderbooks = aggregate_orderbooks(orderbooks_simple)
+        self.arb_dict = arb_dict_from_orderbooks(self.aggregated_orderbooks)
+        self.arb_dict_sorted = sort_arb_dict_orderbooks(self.arb_dict)

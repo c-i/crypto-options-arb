@@ -172,3 +172,16 @@ def get_orderbooks_simple(orderbooks_arg):
 
 
     return orderbooks_simple
+
+
+
+
+class Aevo:
+    def __init__(self):
+        loop = asyncio.new_event_loop()
+        self.index_price = get_index_price()
+        self.markets = get_markets()
+        self.markets_simple = get_markets_simple(self.markets)
+        self.orderbooks = loop.run_until_complete(get_orderbooks(self.markets, loop))
+        loop.close()
+        self.orderbooks_simple = get_orderbooks_simple(self.orderbooks)

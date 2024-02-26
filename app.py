@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import asyncio
 import time
-from arb_engine import *
-import deribit_options_api as deribit
-import aevo_options_api as aevo
+import arb_engine
+from deribit_options_api import Deribit
+from aevo_options_api import Aevo
 
 
 
@@ -53,42 +53,13 @@ def draw_streamlit_gui_orderbooks(arb_dict_orderbooks_sorted):
 
 
 def main():
-    deribit_markets = deribit.get_markets()
-    deribit_markets_simple = deribit.get_markets_simple(deribit_markets)
-    
-    aevo_markets = aevo.get_markets()
-    aevo_markets_simple = aevo.get_markets_simple(aevo_markets)
+    deribit = Deribit()
+    aevo = Aevo()
 
-    aggregated_markets = aggregate_markets(deribit_markets_simple, aevo_markets_simple)
-    arb_dict_mark = arb_dict_from_mark(aggregated_markets)
-
-    arb_dict_mark_sorted = sort_arb_dict_mark(arb_dict_mark)
-
-
-
-    deribit_orderbooks_simple = deribit.get_orderbooks_simple(deribit_markets)
-
-    start = time.perf_counter()
-    loop = asyncio.new_event_loop()
-    aevo_orderbooks = loop.run_until_complete(aevo.get_orderbooks(aevo_markets, loop))
-    loop.close()
-    # print("event loop is closed: " + str(loop.is_closed()))
-    end = time.perf_counter()
-    aevo_orderbooks_simple = aevo.get_orderbooks_simple(aevo_orderbooks)
-    # print(aevo_orderbooks_simple)
-    # print(end-start)
-    
-    aggregated_orderbooks = aggregate_orderbooks(deribit_orderbooks_simple, aevo_orderbooks_simple)
-    # print(aggregated_orderbooks)
-    arb_dict_orderbooks = arb_dict_from_orderbooks(aggregated_orderbooks)
-    # print(arb_dict_orderbooks)
-
-    arb_dict_orderbooks_sorted = sort_arb_dict_orderbooks(arb_dict_orderbooks)
-    # print(arb_dict_orderbooks_sorted)
-    # print(simplify_aggregated_orderbooks(aggregated_orderbooks))
-
-
-    draw_streamlit_gui_orderbooks(arb_dict_orderbooks_sorted)
+    markets = arb_engine.Markets(deribit.markets_simple, aevo.markets_simple)
+    orderbooks = arb_engine.Orderbooks(deribit.orderbooks_simple, aevo.orderbooks_simple)
+   
+    draw_streamlit_gui_orderbooks(orderbooks.arb_dict_sorted)
 
 
 

@@ -127,7 +127,16 @@ def get_orderbooks_simple(markets_arg, quote_usdc=True):
         orderbooks_simple[i][5] = dt.fromtimestamp(dt.timestamp(dt.strptime(orderbooks_simple[i][5], "%d%b%y"))).strftime('%d%b%y').upper()
     
     return orderbooks_simple
-    
+
+
+
+
+class Deribit:
+    def __init__(self):
+        self.index_price = get_index_price()
+        self.markets = get_markets()
+        self.markets_simple = get_markets_simple(self.markets)
+        self.orderbooks_simple = get_orderbooks_simple(self.markets)
         
 
 
