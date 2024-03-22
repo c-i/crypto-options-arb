@@ -94,13 +94,13 @@ def get_orderbooks_simple(orderbooks_arg):
     orderbooks = trim_orderbooks(orderbooks_arg)
 
     orderbooks_simple = ["lyra"]
-    index_price = orderbooks[0]
+    index_price = float(orderbooks[0]["index_price"])
 
     for orderbook in orderbooks:
         instrument_name = orderbook["instrument_name"][:-2]
         strike = float(orderbook["option_details"]["strike"])
         option_type = orderbook["option_details"]["option_type"] #"C" or "P"
-        expiry = orderbook["option_details"]["option_type"] #unix timestamp int
+        expiry = orderbook["option_details"]["expiry"] #(int) unix timestamp in seconds
 
         if option_type == "P":
                 orderbooks_simple_element = [float(orderbook["best_bid_price"]) if float(orderbook["best_bid_amount"]) > 0 else -1, float(orderbook["best_ask_price"]) if float(orderbook["best_ask_amount"]) > 0 else -1, -1, -1, strike, expiry, index_price]
@@ -123,6 +123,9 @@ def get_orderbooks_simple(orderbooks_arg):
             if no_match:
                 orderbooks_simple.append([-1, -1, float(orderbook["best_bid_price"]) if float(orderbook["best_bid_amount"]) > 0 else -1, float(orderbook["best_ask_price"]) if float(orderbook["best_ask_amount"]) > 0 else -1, strike, expiry, index_price])
 
+    # convert to timestamp to 'DDMMYY'
+    for i in range(1, len(orderbooks_simple)):
+        orderbooks_simple[i][5] = dt.fromtimestamp(orderbooks_simple[i][5]).strftime('%d%b%y').upper()
 
     return orderbooks_simple
 
@@ -131,35 +134,10 @@ def get_orderbooks_simple(orderbooks_arg):
 
 class Lyra:
     def __init__(self):
-        # self.index_price = get_index_price()
+        self.instruments = get_instruments()
         loop = asyncio.new_event_loop()
-        self.orderbooks = loop.run_until_complete(get_orderbooks(self.markets, loop))
+        self.orderbooks = loop.run_until_complete(get_orderbooks(self.instruments, loop))
         loop.close()
         self.orderbooks_simple = get_orderbooks_simple(self.orderbooks)
-
-
-
-
-
-
-def main():
-    instruments = get_instruments()
-    # print(get_instruments())
-
-    loop = asyncio.new_event_loop()
-    orderbooks = loop.run_until_complete(get_orderbooks(instruments, loop))
-    loop.close()
-    
-    orderbooks_simple = get_orderbooks_simple(orderbooks)
-    print(orderbooks_simple)
-    
-
-
-if __name__ == "__main__":
-    main()
-
-
-
-
-
+        self.index_price = float(self.orderbooks[0]["index_price"])
 
