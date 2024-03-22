@@ -53,10 +53,11 @@ def draw_streamlit_gui_orderbooks(arb_dict_orderbooks_sorted):
 
 
 def main():
+    # TODO if necessary: make calling all constructors async, construct just the loop then make get_orderbooks an async method of the class, then call the method seperately
     deribit = Deribit()
     aevo = Aevo()
 
-    markets = arb_engine.Markets(deribit.markets_simple, aevo.markets_simple)
+    # markets = arb_engine.Markets(deribit.markets_simple, aevo.markets_simple)
     orderbooks = arb_engine.Orderbooks(deribit.orderbooks_simple, aevo.orderbooks_simple)
    
     draw_streamlit_gui_orderbooks(orderbooks.arb_dict_sorted)

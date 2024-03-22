@@ -1,4 +1,3 @@
-# should probably make classes
 import aevo_options_api as aevo
 import deribit_options_api as deribit
 import asyncio

@@ -109,7 +109,7 @@ async def get_orderbook(market, loop, limit_sem):
 
 
 # takes markets and requests orderbook for each instrument_name in markets then returns list of all orderbooks
-# orderbooks[n]["bids"] and ["asks]: Array of 3 elements, price in USD, contract amount, and IV respectively.
+# orderbooks[n]["bids"] and ["asks"]: Array of 3 elements, price in USD, contract amount, and IV respectively.
 async def get_orderbooks(markets_arg, loop):
     # limit seems to be 20 at a time followed by pause
     limit_sem = asyncio.Semaphore(20)
