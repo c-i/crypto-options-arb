@@ -1,7 +1,7 @@
 import aevo_options_api as aevo
 import deribit_options_api as deribit
 import asyncio
-import math
+from math import ceil
 import time
 import copy
 from datetime import datetime as dt
@@ -280,7 +280,7 @@ def arb_dict_from_orderbooks(aggregated_orderbooks_arg):
                 orders[2] = None
 
             expiry_unix = dt.timestamp(dt.strptime(expiry, "%d%b%y"))
-            apy = math.ceil((1 + expiry_unix - time_now) / 86400) * percent_profit / 365
+            apy = ceil((1 + expiry_unix - time_now) / 86400) * percent_profit / 365
             
             if orders[0] != None or orders[1] != None:
                 arb_dict[expiry] = {}
