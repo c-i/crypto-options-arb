@@ -2,4 +2,6 @@ Simple streamlit app that calculates and displays put-call parity arbitrage oppo
 
 Requirements: aiohttp, pandas, streamlit
 
-Run from command line: streamlit run C:/{absolute-path-to}/app.py
+To launch the app in command line, navigate to the file directory where the project files are stored use the command: streamlit run app.py
+Alternatively, you can run it from anywhere using the absolute path: streamlit run C:/{path_to}/app.py
+
