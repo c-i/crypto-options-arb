@@ -5,6 +5,7 @@ from math import ceil
 import time
 import copy
 from datetime import datetime as dt
+from datetime import timezone
 
 
 
@@ -151,7 +152,7 @@ def aggregate_orderbooks(orderbooks_simple_args):
     # orderbooks_simple_args: ([exchange, [put_bid, put_ask, call_bid, call_ask, strike, expiry, index], ... ,[]], ... , [exchange_n, [], ... []])
     # aggregated_orderbooks format: {expiry1: {strike1: [[[put_bid, label]...[]], [[put_ask, label]...[]], [[call_bid, label], [[call_ask, label], ...[]]]}, ... , strike_n: [[], [], [], []]}, ... , expiry_n: {...}}
     orderbooks = list(orderbooks_simple_args)
-    print(orderbooks[0])
+    # print(orderbooks[0])
     aggregated_orderbooks = {}
     # max of indexes between exchanges just to be safe
     indices = [orderbooks[0][1][6]]
@@ -234,7 +235,7 @@ def simplify_aggregated_orderbooks(aggregated_orderbooks):
     return aggregated_orderbooks_simple
           
             
-# later add annualised return
+
 # {expiry: {strike: [[[best_put_bid, exchange], [best_put_ask, exchange], [best_call_bid, exchange], [best_call_ask, exchange], absolute_profit, percent_profit], ... []], ... strike_n: []}, ... expiry_n: ... }
 def arb_dict_from_orderbooks(aggregated_orderbooks_arg):
     orderbooks = simplify_aggregated_orderbooks(aggregated_orderbooks_arg)
@@ -279,8 +280,9 @@ def arb_dict_from_orderbooks(aggregated_orderbooks_arg):
                 orders[1] = None
                 orders[2] = None
 
-            expiry_unix = dt.timestamp(dt.strptime(expiry, "%d%b%y"))
-            apy = ceil((1 + expiry_unix - time_now) / 86400) * percent_profit / 365
+            expiry_dt = dt.strptime(expiry + " 08:00:00", "%d%b%y %H:%M:%S")
+            expiry_unix = expiry_dt.replace(tzinfo=timezone.utc).timestamp()
+            apy = (365 / ceil((1 + expiry_unix - time_now) / 86400)) * percent_profit
             
             if orders[0] != None or orders[1] != None:
                 arb_dict[expiry] = {}

@@ -61,6 +61,7 @@ def main():
 
     # markets = arb_engine.Markets(deribit.markets_simple, aevo.markets_simple)
     orderbooks = arb_engine.Orderbooks(deribit.orderbooks_simple, lyra.orderbooks_simple, aevo.orderbooks_simple)
+    print(orderbooks.arb_dict_sorted)
    
     draw_streamlit_gui_orderbooks(orderbooks.arb_dict_sorted)
 
